@@ -3,17 +3,15 @@ const Schema = mongoose.Schema;
 
 const productSchema = new Schema(
   {
-    name: { type: String, required: true, trim: true },
-    price: { type: Number },
-    branch: { type: Schema.Types.ObjectId, ref: "Branch" },
+    type: { type: String, required: true, trim: true },
+    price: { type: Number, required: true },
+    color: { type: String },
+    branch: { type: Schema.Types.ObjectId, required: true, ref: "Branch" },
   },
-  { collection: "products", timestamps: true, toJSON: { virtuals: true } }
+  {
+    collection: "products",
+  }
 );
-
-productSchema.virtual("price_vat").get(function () {
-  return (this.price * 0.07) + this.price;
-});
-
 
 const product = mongoose.model("Product", productSchema);
 

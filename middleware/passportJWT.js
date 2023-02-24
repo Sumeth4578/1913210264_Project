@@ -12,16 +12,16 @@ passport.use(
   new JwtStrategy(opts, async (jwt_payload, done) => {
     try {
       const user = await User.findById(jwt_payload.id);
-      console.log(user)
+      console.log(user);
       if (!user) {
-        return done(new Error("ไม่พบผู้ใช้งาน"),null);
+        return done(new Error("ไม่พบผู้ใช้งาน"), null);
       }
-      
-      return done(null,user)
+
+      return done(null, user);
     } catch (error) {
       done(error);
     }
   })
 );
 
-module.exports.isLogin = passport.authenticate("jwt",{session:false})
+module.exports.isLogin = passport.authenticate("jwt", { session: false });

@@ -4,21 +4,16 @@ const Schema = mongoose.Schema;
 const branchSchema = new Schema(
   {
     name: { type: String, required: true, trim: true },
-    location: {
-      lat: Number,
-      lgn: Number,
-    },
-    // createdAt: { type: Date, default: Date.now },
-    // updatedAt: { type: Date, default: Date.now },
+    district: { type: String },
   },
-  { collection: "branch", timestamps: true ,toJSON:{virtual:true}}
+  { collection: "branch", timestamps: true, toJSON: { virtual: true } }
 );
 
-branchSchema.virtual("branchProduct",{
-    ref: 'Product',    
-    localField: '_id', 
-    foreignField: 'branch',
-})
+branchSchema.virtual("branchProduct", {
+  ref: "Product",
+  localField: "_id",
+  foreignField: "branch",
+});
 
 const branch = mongoose.model("Branch", branchSchema);
 

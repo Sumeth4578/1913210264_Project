@@ -4,9 +4,9 @@ module.exports.isAdmin = (req, res, next) => {
     next();
   } else {
     return res.status(403).json({
-        error:{
-            message: 'คุณไม่มีสิทธิ์ใช้งานส่วนนี้ เฉพาะผู้ดูแลระบบเท่านั้น'
-        }
-    })
+      error: {
+        message: "คุณไม่มีสิทธิ์ใช้งานส่วนนี้ เฉพาะผู้ดูแลระบบเท่านั้น",
+      },
+    });
   }
 };

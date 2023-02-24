@@ -1,10 +1,13 @@
 const Branch = require("../models/branch");
 const Product = require("../models/products");
 const config = require("../config/index");
-const { validationResult } = require('express-validator')
+const { validationResult } = require("express-validator");
 
 exports.index = async (req, res, next) => {
-  const branchs = await Branch.find().sort({ _id: -1 });
+  const branchs = await Branch.find(
+    {},
+    { createdAt: 0, updatedAt: 0, __v: 0 }
+  ).sort({ name: 1 });
 
   res.status(200).json({
     data: branchs,
@@ -12,10 +15,13 @@ exports.index = async (req, res, next) => {
 };
 
 exports.product = async (req, res, next) => {
-  const product = await Product.find().populate("branch");
+  const products = await Product.find(
+    {},
+    { createdAt: 0, updatedAt: 0, __v: 0 }
+  ).populate("branch");
 
   res.status(200).json({
-    data: product,
+    data: products,
   });
 };
 
@@ -31,8 +37,9 @@ exports.branchProduct = async (req, res, next) => {
 
 exports.insert = async (req, res, next) => {
   try {
-    const { name, location } = req.body;
+    const { name, district } = req.body;
 
+    //validation
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       const error = new Error("ข้อมูลที่ได้รับมาไม่ถูกต้อง");
@@ -43,7 +50,7 @@ exports.insert = async (req, res, next) => {
 
     let branch = new Branch({
       name: name,
-      location: location,
+      district: district,
     });
 
     await branch.save();
@@ -56,49 +63,37 @@ exports.insert = async (req, res, next) => {
   }
 };
 
-exports.update = async (req, res, next) => {
+exports.insertproduct = async (req, res, next) => {
   try {
-    const { id } = req.params;
-    const {
-      name,
-    } = req.body;
+    const { type, price, color, branch } = req.body;
 
-    const branch = await Branch.findOneAndUpdate(
-      { _id: id },
-      {
-        name: name,
-      }
-    );
-    if (!branch) {
-      const error = new Error("ไม่ได้อัพเดทข้อมูล");
+    const tempBranch = Branch.findOne({ _id: branch });
+    if (!tempBranch) {
+      const error = new Error("ไม่พบข้อมูลของสาขา");
       error.statusCode = 400;
       throw error;
-    } else {
-      res.status(200).json({
-        message: "อัพเดทแล้ว",
-      });
     }
-  } catch (error) {
-    next(error)
-  }
-};
 
-exports.show = async (req, res, next) => {
-  try {
-    const { id } = req.params;
+    //validation
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      const error = new Error("ข้อมูลที่ได้รับมาไม่ถูกต้อง");
+      error.statusCode = 422;
+      error.validation = errors.array();
+      throw error;
+    }
 
-    const branch = await Branch.findOne({
-      _id: id,
+    let product = new Product({
+      type: type,
+      price: price,
+      color: color,
+      branch: branch,
     });
-    if (!branch) {
-      const error = new Error("ไม่พบข้อมูล");
-      error.statusCode = 400;
-      throw error;
-    } else {
-      res.status(200).json({
-        data: branch,
-      });
-    }
+    await product.save();
+
+    res.status(200).json({
+      message: "เพิ่มข้อมูลเรียบร้อยแล้ว",
+    });
   } catch (error) {
     next(error);
   }
@@ -113,15 +108,93 @@ exports.destroy = async (req, res, next) => {
     });
 
     if (branch.deletedCount === 0) {
-      const error = new Error("ไม่สามารถลบข้อมูลได้");
+      const error = new Error("ไม่สามารถลบข้อมูลได้ / ไม่พบข้อมูลผู้ใช้งาน");
       error.statusCode = 400;
       throw error;
     } else {
       res.status(200).json({
-        message: "ลบข้อมูลแล้ว",
+        message: "ลบข้อมูลเรียบร้อยแล้ว",
       });
     }
   } catch (error) {
-    next(error)
+    next(error);
+  }
+};
+
+exports.destroyproduct = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+
+    const product = await Product.deleteOne({
+      _id: id,
+    });
+
+    if (product.deletedCount === 0) {
+      const error = new Error("ไม่สามารถลบข้อมูลได้ / ไม่พบข้อมูลผู้ใช้งาน");
+      error.statusCode = 400;
+      throw error;
+    } else {
+      res.status(200).json({
+        message: "ลบข้อมูลเรียบร้อยแล้ว",
+      });
+    }
+  } catch (error) {
+    next(error);
+  }
+};
+
+exports.update = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const { name, district } = req.body;
+
+    const branch = await Branch.findOneAndUpdate(
+      { _id: id },
+      {
+        name: name,
+        district: district,
+      }
+    );
+
+    if (!branch) {
+      const error = new Error("ไม่พบข้อมูลของสาขา");
+      error.statusCode = 400;
+      throw error;
+    }
+
+    res.status(200).json({
+      message: "แก้ไขข้อมูลเรียบร้อยแล้ว",
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+exports.updateproduct = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const { type, price, branch, color } = req.body;
+
+    const product = await Product.findOneAndUpdate(
+      { _id: id },
+      {
+        tpye: type,
+        price: price,
+        branch: branch,
+        color: color,
+      }
+    );
+
+    if (!product) {
+      const error = new Error("ไม่พบข้อมูลสินค้า");
+      error.statusCode = 400;
+      throw error;
+    }
+
+    res.status(200).json({
+      message: "แก้ไขข้อมูลเรียบร้อยแล้ว",
+    });
+  } catch (error) {
+    next(error);
   }
 };

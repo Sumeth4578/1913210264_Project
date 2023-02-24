@@ -4,22 +4,7 @@ const jwt = require("jsonwebtoken");
 const config = require("../config/index");
 
 exports.index = (req, res, next) => {
-  res.status(200).json({
-    fullname: "Sumeth Thanadilok",
-  });
-};
-
-exports.bio = (req, res, next) => {
-  res.status(200).json({
-    fullname: "Sumeth Thanadilok",
-    nickname: "Touch",
-    hobby: "Sleep",
-    gitusername: "Sumeth4578",
-  });
-};
-
-exports.profile = (req, res, next) => {
-  const {role,name,email} = req.user
+  const { role, name, email } = req.user;
   res.status(200).json({
     name: name,
     email: email,
@@ -44,7 +29,7 @@ exports.register = async (req, res, next) => {
     const existEmail = await User.findOne({ email: email });
 
     if (existEmail) {
-      const error = new Error("อีเมล์นี้มีผู้ใช้งานในระบบแล้ว");
+      const error = new Error("อีเมลนี้มีผู้ใช้งานในระบบแล้ว");
       error.statusCode = 400;
       throw error;
     }
@@ -105,7 +90,7 @@ exports.login = async (req, res, next) => {
     res.status(200).json({
       access_token: token,
       expire_in: expire_in.exp,
-      token_type: 'Bearer',
+      token_type: "Bearer",
     });
   } catch (error) {
     next(error);

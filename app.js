@@ -11,6 +11,7 @@ const errorHandle = require('./middleware/errorHandle')
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
 var branchRouter = require('./routes/branch');
+var staffRouter = require('./routes/staff');
 
 var app = express();
 
@@ -29,9 +30,9 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use(passport.initialize())
 
 app.use('/', indexRouter);
-app.use('/user', usersRouter);
 app.use('/users', usersRouter);
 app.use('/branch', branchRouter);
+app.use('/staff', staffRouter);
 
 app.use(errorHandle)
 module.exports = app;
